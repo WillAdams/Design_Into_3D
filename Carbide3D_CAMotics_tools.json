@@ -1,0 +1,79 @@
+{
+  "101": {
+    "units": "INCH",
+    "shape": "BALLNOSE",
+    "length": 0.5,
+    "diameter": 0.125,
+    "description": ""
+  },
+  "102": {
+    "units": "INCH",
+    "shape": "CYLINDRICAL",
+    "length": 0.5,
+    "diameter": 0.125,
+    "description": ""
+  },
+  "111": {
+    "units": "INCH",
+    "shape": "BALLNOSE",
+    "length": 0.5,
+    "diameter": 0.0625,
+    "description": ""
+  },
+  "112": {
+    "units": "INCH",
+    "shape": "CYLINDRICAL",
+    "length": 0.25,
+    "diameter": 0.0625,
+    "description": ""
+  },
+  "121": {
+    "units": "INCH",
+    "shape": "BALLNOSE",
+    "length": 0.0625,
+    "diameter": 0.0312,
+    "description": ""
+  },
+  "122": {
+    "units": "INCH",
+    "shape": "CYLINDRICAL",
+    "length": 0.0625,
+    "diameter": 0.0312,
+    "description": ""
+  },
+  "201": {
+    "units": "INCH",
+    "shape": "CYLINDRICAL",
+    "length": 0.5,
+    "diameter": 0.25,
+    "description": ""
+  },
+  "202": {
+    "units": "INCH",
+    "shape": "BALLNOSE",
+    "length": 0.5,
+    "diameter": 0.25,
+    "description": ""
+  },
+  "251": {
+    "units": "INCH",
+    "shape": "CYLINDRICAL",
+    "length": 0.75,
+    "diameter": 0.25,
+    "description": ""
+  },
+  "301": {
+    "units": "INCH",
+    "shape": "CONICAL",
+    "length": 0.25,
+    "diameter": 0.5,
+    "description": ""
+  },
+  "302": {
+    "units": "INCH",
+    "shape": "CONICAL",
+    "length": 0.433013,
+    "diameter": 0.5,
+    "description": ""
+  }
+}
