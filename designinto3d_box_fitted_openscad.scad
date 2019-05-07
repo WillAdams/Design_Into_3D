@@ -1,7 +1,8 @@
 //!OpenSCAD
-//Please use the Customizer to interact with this (if necessary, show it by clearing the checkbox in front of View | Hide Customizer), and close this Editor window.
+//
+// Please use the Customizer to interact with this (if necessary, show it by clearing the checkbox in front of View | Hide Customizer), and close this Editor window.
 
-/* [Overview] */
+// * [Overview] *
 
 //Part
 PARTNO = "0"; // [0:All, 1:Top, 2:Bottom]
@@ -10,41 +11,41 @@ partspacing = 12.7;
 
 $fn=45;
 
-/* [Box Parameters] */
-
-//Type of Corner
-boxshape = "rounded"; // ["square":Square, "rounded":Rounded]
-width = 50.8;
-length = 50.8;
-height = 12.7;
-thickness = 6.35;
+// Type of Corner
+Boxshape = "rounded"; //["square":Square, "rounded":Rounded]
+Width = 50.8;
+Length = 25.4;
+Height = 12.7;
+Thickness = 6.35;
 
 /* [Dividers] */
-//Thickness
+// Thickness
 dividers_thickness = 3.175;
-//Number of dividers lengthwise
-dividers_lengthwise = 2;
-//Number of dividers widthwise
-dividers_widthwise = 1;
-//Large Compartment
-largecompartment = "widthwise"; // ["lengthwise":Lengthwise, "widthwise":Widthwise, "none":None]
+// Number of dividers widthwise
+dividers_widthwise = 2;
+// Number of dividers lengthwise
+dividers_lengthwise = 1;
+// Large Compartment
+largecompartment = "none"; // ["lengthwise":Lengthwise, "widthwise":Widthwise, "none":None]
 
 /* [Endmill Parameters] */
 
-//Shape
-endmillshape = "ball";// ["ball":Ball, "square":Square]
+// Shape
+endmillshape = "ball";// [0:ball, 1:square, 2:dovetail]
 diameter = 3.175;
 depth = 25.4;
 
+Clearance = 0.01;
 
-halfthickness = thickness / 2;
-quarterthickness = thickness / 4;
+halfthickness = Thickness / 2;
+quarterthickness = Thickness / 4;
 radius = diameter / 2;
 adjdepth = depth - radius;
-intwidth = width - thickness * 2;
-intlength = length - thickness * 2;
-pcwidth = (intwidth - dividers_thickness * dividers_lengthwise) / (dividers_lengthwise + 1);
-pclength = (intlength - dividers_thickness * dividers_widthwise) / (dividers_widthwise + 1);
+intwidth = Width - Thickness * 2;
+intlength = Length - Thickness * 2;
+pcwidth = (intwidth - dividers_thickness * dividers_widthwise) / (dividers_widthwise + 1);
+pclength = (intlength - dividers_thickness * dividers_lengthwise) / (dividers_lengthwise + 1);
+halfclearance = Clearance / 2;
 
 module endmillcut(emcshape, emcdiameter, emcdepth) {
   emcshape = emcshape;
@@ -70,15 +71,15 @@ module endmillcut(emcshape, emcdiameter, emcdepth) {
 }
 
 module lid() {
-  translate([0, (length + partspacing), 0]){
+  translate([0, (Length + partspacing), 0]){
     difference() {
-      if (boxshape == "rounded") {
-        pocketrect(0, 0, 0, "square", thickness, length, width, thickness);
+      if (Boxshape == "rounded") {
+        pocketrect(0, 0, 0, "square", Thickness, Length, Width, Thickness);
       } else {
-        cube([width, length, thickness], center=false);
+        cube([Width, Length, Thickness], center=false);
       }
 
-      pocketrect(thickness / 2, thickness / 2, halfthickness, "square", halfthickness, length - thickness, width - thickness, height);
+      pocketrect(Thickness / 2 - halfclearance, Thickness / 2 - halfclearance, halfthickness, "square", halfthickness, (Length - Thickness) + halfclearance * 2, (Width - Thickness) + halfclearance * 2, Height);
     }
   }
 }
@@ -106,23 +107,23 @@ module pocketrect(px, py, pbottom, endmillshape, pdiameter, plength, pwidth, pde
 module box() {
   difference() {
     union(){
-      if (boxshape == "rounded") {
-        pocketrect(0, 0, 0, "square", thickness, length, width, height - halfthickness);
+      if (Boxshape == "rounded") {
+        pocketrect(0, 0, 0, "square", Thickness, Length, Width, Height - halfthickness);
       } else {
-        cube([width, length, (height - halfthickness)], center=false);
+        cube([Width, Length, (Height - halfthickness)], center=false);
       }
 
-      pocketrect(thickness / 2, thickness / 2, halfthickness, "square", halfthickness, length - thickness, width - thickness, height - halfthickness);
+      pocketrect(Thickness / 2 + halfclearance, Thickness / 2 + halfclearance, halfthickness, "square", halfthickness, (Length - Thickness) - halfclearance * 2, (Width - Thickness) - halfclearance * 2, Height - halfthickness);
     }
 
-    for (i = [0 : abs(1) : dividers_lengthwise]) {
-      for (j = [0 : abs(1) : dividers_widthwise]) {
+    for (i = [0 : abs(1) : dividers_widthwise]) {
+      for (j = [0 : abs(1) : dividers_lengthwise]) {
         if (largecompartment == "lengthwise" && (i % 2 == 1 && j == 0)) {
-          pocketrect((thickness + pcwidth * i) + dividers_thickness * (i + 0), (thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, intlength, pcwidth, height);
+          pocketrect((Thickness + pcwidth * i) + dividers_thickness * (i + 0), (Thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, intlength, pcwidth, Height);
         } else if (largecompartment == "widthwise" && (j % 2 == 0 && i == 0)) {
-          pocketrect((thickness + pcwidth * i) + dividers_thickness * (i + 0), (thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, pclength, intwidth, height);
+          pocketrect((Thickness + pcwidth * i) + dividers_thickness * (i + 0), (Thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, pclength, intwidth, Height);
         } else {
-          pocketrect((thickness + pcwidth * i) + dividers_thickness * (i + 0), (thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, pclength, pcwidth, height);
+          pocketrect((Thickness + pcwidth * i) + dividers_thickness * (i + 0), (Thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, pclength, pcwidth, Height);
         }
 
       }
@@ -132,13 +133,19 @@ module box() {
   }
 }
 
+module fittedbox() {
+  if (PARTNO == "1") {
+    lid();
+  } else if (PARTNO == "2") {
+    box();
+  } else {
+    union(){
+      lid();
+      box();
+    }
+  }
 
-if (PARTNO == "1") lid();
-if (PARTNO == "2") box();
-
-// optionally use 0 for whole object
-
-if (PARTNO == "0") {
-box();
-lid();
 }
+
+fittedbox();
+
