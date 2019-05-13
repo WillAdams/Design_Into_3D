@@ -1,11 +1,10 @@
 //!OpenSCAD
 //
 // Please use the Customizer to interact with this (if necessary, show it by clearing the checkbox in front of View | Hide Customizer), and close this Editor window.
-
 // * [Overview] *
-
-//Part
-PARTNO = "0"; // [0:All, 1:Top, 2:Bottom]
+// Part
+// [0:All, 1:Top, 2:Bottom]
+PARTNO = 0;
 
 partspacing = 12.7;
 
@@ -26,27 +25,15 @@ dividers_widthwise = 2;
 // Number of dividers lengthwise
 dividers_lengthwise = 1;
 // Large Compartment
-largecompartment = "none"; // ["lengthwise":Lengthwise, "widthwise":Widthwise, "none":None]
+largecompartment = "none";// ["lengthwise":Lengthwise, "widthwise":Widthwise, "none":None]
 
 /* [Endmill Parameters] */
-
 // Shape
-endmillshape = "ball";// [0:ball, 1:square, 2:dovetail]
+endmillshape = "square";// ["ball":Ball, "square":Square]
 diameter = 3.175;
 depth = 25.4;
 
 Clearance = 0.01;
-
-halfthickness = Thickness / 2;
-quarterthickness = Thickness / 4;
-radius = diameter / 2;
-adjdepth = depth - radius;
-intwidth = Width - Thickness * 2;
-intlength = Length - Thickness * 2;
-pcwidth = (intwidth - dividers_thickness * dividers_widthwise) / (dividers_widthwise + 1);
-pclength = (intlength - dividers_thickness * dividers_lengthwise) / (dividers_lengthwise + 1);
-halfclearance = Clearance / 2;
-
 module endmillcut(emcshape, emcdiameter, emcdepth) {
   emcshape = emcshape;
   emcdiameter = emcdiameter;
@@ -65,6 +52,20 @@ module endmillcut(emcshape, emcdiameter, emcdepth) {
   } else if (emcshape == "square") {
     translate([0, 0, 0]){
       cylinder(r1=emcradius, r2=emcradius, h=emcdepth, center=false);
+    }
+  }
+
+}
+
+module fittedbox() {
+  if (PARTNO == "1") {
+    lid();
+  } else if (PARTNO == "2") {
+    box();
+  } else {
+    union(){
+      lid();
+      box();
     }
   }
 
@@ -133,19 +134,14 @@ module box() {
   }
 }
 
-module fittedbox() {
-  if (PARTNO == "1") {
-    lid();
-  } else if (PARTNO == "2") {
-    box();
-  } else {
-    union(){
-      lid();
-      box();
-    }
-  }
-
-}
+halfthickness = Thickness / 2;
+quarterthickness = Thickness / 4;
+radius = diameter / 2;
+adjdepth = depth - radius;
+intwidth = Width - Thickness * 2;
+intlength = Length - Thickness * 2;
+pcwidth = (intwidth - dividers_thickness * dividers_widthwise) / (dividers_widthwise + 1);
+pclength = (intlength - dividers_thickness * dividers_lengthwise) / (dividers_lengthwise + 1);
+halfclearance = Clearance / 2;
 
 fittedbox();
-
