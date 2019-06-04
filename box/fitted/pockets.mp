@@ -31,3 +31,11 @@ enddef;
 def rp (expr x,y,z,w,l,t,d) =
 draw(x,y+ t)..(x+t/3.41397849, y+t/3.41397849)..(x+t,y+0)--(x+w - t,y+0)..(x+w - t/3.41397849, y+t/3.41397849)..(x+w,y+t)--(x+w,y+l - t)..(x+w - t/3.41397849,y+l - t/3.41397849)..(x+w - t,y+l)--(x+t,y+l)..(x+t/3.41397849,y+l - t/3.41397849)..(x, y+l - t)--cycle;
 enddef;
+
+def rpf (expr x,y,z,w,l,t,d,f) =
+fill (x,y+ t)..(x+t/3.41397849, y+t/3.41397849)..(x+t,y+0)--(x+w - t,y+0)..(x+w - t/3.41397849, y+t/3.41397849)..(x+w,y+t)--(x+w,y+l - t)..(x+w - t/3.41397849,y+l - t/3.41397849)..(x+w - t,y+l)--(x+t,y+l)..(x+t/3.41397849,y+l - t/3.41397849)..(x, y+l - t)--cycle withgreyscale f;
+enddef;
+
+def rpu (expr x,y,z,w,l,t,d) =
+unfill (x,y+ t)..(x+t/3.41397849, y+t/3.41397849)..(x+t,y+0)--(x+w - t,y+0)..(x+w - t/3.41397849, y+t/3.41397849)..(x+w,y+t)--(x+w,y+l - t)..(x+w - t/3.41397849,y+l - t/3.41397849)..(x+w - t,y+l)--(x+t,y+l)..(x+t/3.41397849,y+l - t/3.41397849)..(x, y+l - t)--cycle;
+enddef;
