@@ -2,7 +2,7 @@
 
 stockwidth = 89;
 stockthickness = 19.5;
-my_3DprevieworDXF = 0;
+my_3DprevieworDXF = true;
 $fa = 0.8;//0.2;
 $fs = 0.8;//0.2;
 
@@ -15,7 +15,7 @@ covespacing = (stockwidth - nou * covediameter) / nou;
 csr = covespacing / 2;
 
 
-if (my_3DprevieworDXF == 1) {
+if (my_3DprevieworDXF == true) {
   knappbox3d();
 } else {
   projection(cut = true) knappboxjoint();
