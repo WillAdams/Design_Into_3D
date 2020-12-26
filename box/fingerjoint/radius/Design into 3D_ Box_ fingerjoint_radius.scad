@@ -7,7 +7,7 @@ Stock_Thickness = 0.25;
 Part_Spacing = 0.5;
 Scaling_Factor = 1;
 Rounding = true;
-Preview = "3D"; // [3D:3D Preview, Parts:Parts, Radius:Radius, Intersect:Intersect]
+Preview = "3D"; // [3D:3D Preview, Parts:Parts, Radius:Radius, Intersect:Intersect, FrontBack:FrontBack, Bottom:Bottom, Sides:Sides, CutRoundedPocket:CutRoundedPocket]
 Detail = 20;
 Endmill_Diameter = 0.25;
 
@@ -32,6 +32,21 @@ $fn = Detail * 1;
 
 tool_radius_tip = 0.03125 * Scaling_Factor;
 tool_radius_width = 0.125 * Scaling_Factor;
+
+module Vendmill() {
+  cylinder(r1=0, r2=0.25, h=0.25, center=false);
+}
+
+module Vendmillcut(bx, by, bz, ex, ey, ez) {
+  hull(){
+    translate([bx, by, bz]){
+      Vendmill();
+    }
+    translate([ex, ey, ez]){
+      Vendmill();
+    }
+  }
+}
 
 
 module radiuscut(beginx, beginy, endx, endy) {
@@ -91,7 +106,7 @@ module frontback() {
       cutzevenfingerjoints();
     }
     translate([(w - st), (st / 2), 0]){
-      cutzevenfingerjoints();
+      cutzrevenfingerjoints();
     }
   }
 }
@@ -102,7 +117,14 @@ module cutzevenfingerjoints() {
       cutroundedpocketx(0, 0, st, st + endmillradius, fjwidz, 0);
     }
   }
+}
 
+module cutzrevenfingerjoints() {
+  for (i = [1 : abs(2) : fjnumz - 1]) {
+    translate([0, (fjwidz * i), 0]){
+      cutroundedpocketxr(0, 0, st, st + endmillradius, fjwidz, 0);
+    }
+  }
 }
 
 module cutxoddfingerjoints() {
@@ -111,7 +133,14 @@ module cutxoddfingerjoints() {
       cutroundedpockety(0, 0, st, fjwidx, st + endmillradius, 0);
     }
   }
+}
 
+module cutxroddfingerjoints() {
+  for (i = [0 : abs(2) : fjnumx - 1]) {
+    translate([(fjwidx * i), 0, 0]){
+      cutroundedpocketyr(0, 0, st, fjwidx, st + endmillradius, 0);
+    }
+  }
 }
 
 module cutxevenfingerjoints() {
@@ -120,7 +149,6 @@ module cutxevenfingerjoints() {
       cutroundedpockety(0, 0, st, fjwidx, st + endmillradius, 0);
     }
   }
-
 }
 
 module topbottom() {
@@ -138,13 +166,13 @@ module topbottom() {
       cutxoddfingerjoints();
     }
     translate([(st / 2), (d - st), 0]){
-      cutxoddfingerjoints();
+      cutxroddfingerjoints();
     }
     translate([(-endmillradius), (st / 2), 0]){
       cutyoddfingerjoints();
     }
     translate([(w - st), (st / 2), 0]){
-      cutyoddfingerjoints();
+      cutyroddfingerjoints();
     }
   }
 }
@@ -157,6 +185,14 @@ module cutyoddfingerjoints() {
   for (i = [0 : abs(2) : fjnumy - 1]) {
     translate([0, (fjwidy * i), 0]){
       cutroundedpocketx(0, 0, st, st + endmillradius, fjwidy, 0);
+    }
+  }
+}
+
+module cutyroddfingerjoints() {
+  for (i = [0 : abs(2) : fjnumy - 1]) {
+    translate([0, (fjwidy * i), 0]){
+      cutroundedpocketxr(0, 0, st, st + endmillradius, fjwidy, 0);
     }
   }
 
@@ -177,10 +213,10 @@ module sides() {
       cutzoddfingerjoints();
     }
     translate([(st / 2), (d - st), 0]){
-      cutzoddfingerjoints();
+      cutzroddfingerjoints();
     }
     translate([(h - st), (st / 2), 0]){
-      cutyevenfingerjoints();
+      cutyrevenfingerjoints();
     }
   }
 }
@@ -192,6 +228,14 @@ module cutzoddfingerjoints() {
     }
   }
 
+}
+
+module cutzroddfingerjoints() {
+  for (i = [0 : abs(2) : fjnumz - 1]) {
+    translate([(fjwidz * i), 0, 0]){
+      cutroundedpocketyr(0, 0, st, fjwidz, st + endmillradius, 0);
+    }
+  }
 }
 
 module cutroundedpocket(bx, by, bz, ex, ey, ez) {
@@ -216,6 +260,45 @@ cutroundedpocket(bx, by, bz, ex, ey, ez);
     if (Rounding == true) {
 radiuscut(bx+tool_radius_tip, by+tool_radius_width, bx+tool_radius_tip, ey-tool_radius_width);
 radiuscut(ex-tool_radius_tip, by+tool_radius_width, ex-tool_radius_tip, ey-tool_radius_width);
+Vendmillcut(
+        bx, 
+        ey-0.0937, 
+        st-0.0937, 
+        bx+0.0937, 
+        ey, 
+        st
+        );
+Vendmillcut(
+        ex, 
+        ey-0.0937, 
+        st-0.0937, 
+        ex-0.0937, 
+        ey, 
+        st
+        );
+}}
+
+module cutroundedpocketyr(bx, by, bz, ex, ey, ez) {
+cutroundedpocket(bx, by, bz, ex, ey, ez);
+    if (Rounding == true) {
+radiuscut(bx+tool_radius_tip, by+tool_radius_width, bx+tool_radius_tip, ey-tool_radius_width);
+radiuscut(ex-tool_radius_tip, by+tool_radius_width, ex-tool_radius_tip, ey-tool_radius_width);
+Vendmillcut(
+        bx, 
+        by+0.0937, 
+        st-0.0937, 
+        bx+0.0937, 
+        by, 
+        st
+        );
+Vendmillcut(
+        ex, 
+        by+0.0937, 
+        st-0.0937, 
+        ex-0.0937, 
+        by, 
+        st
+        );
 }}
 
 module cutroundedpocketx(bx, by, bz, ex, ey, ez) {
@@ -223,6 +306,45 @@ cutroundedpocket(bx, by, bz, ex, ey, ez);
     if (Rounding == true) {
 radiuscut(bx+tool_radius_width, by+tool_radius_tip, ex-tool_radius_width, by+tool_radius_tip);
 radiuscut(bx+tool_radius_width, ey-tool_radius_tip, ex-tool_radius_width, ey-tool_radius_tip);
+Vendmillcut(
+        ex-0.0937, 
+        ey, 
+        st-0.0937, 
+        ex, 
+        ey-0.0937, 
+        st
+        );
+Vendmillcut(
+        ex-0.0937, 
+        by, 
+        st-0.0937, 
+        ex, 
+        by+0.0937, 
+        st
+        );
+}}
+
+module cutroundedpocketxr(bx, by, bz, ex, ey, ez) {
+cutroundedpocket(bx, by, bz, ex, ey, ez);
+    if (Rounding == true) {
+radiuscut(bx+tool_radius_width, by+tool_radius_tip, ex-tool_radius_width, by+tool_radius_tip);
+radiuscut(bx+tool_radius_width, ey-tool_radius_tip, ex-tool_radius_width, ey-tool_radius_tip);
+Vendmillcut(
+        bx+0.0937, 
+        ey, 
+        st-0.0937, 
+        bx, 
+        ey-0.0937, 
+        st
+        );
+Vendmillcut(
+        bx+0.0937, 
+        by, 
+        st-0.0937, 
+        bx, 
+        by+0.0937, 
+        st
+        );
 }}
 
 //radiuscut(0, 0, 2, 2);
@@ -235,6 +357,17 @@ module cutyevenfingerjoints() {
   }
 
 }
+
+module cutyrevenfingerjoints() {
+  for (i = [1 : abs(2) : fjnumz]) {
+    translate([0, (fjwidy * i), 0]){
+      cutroundedpocketxr(0, 0, st, st + endmillradius, fjwidy, 0);
+    }
+  }
+
+}
+
+
 
 if (Preview == "Parts") {
   union(){
@@ -287,9 +420,43 @@ if (Preview == "Radius")
     cutroundedpocketx(0, 0, st, st + endmillradius, 1, 0);
 }
 
+if (Preview == "FrontBack") 
+{
+        frontback();
+}
+
+if (Preview == "Bottom") 
+{
+        topbottom();
+}
+
+if (Preview == "Sides") 
+{
+        sides();
+}
+
+if (Preview == "CutRoundedPocket") 
+{
+cutroundedpocketx(
+    //bx
+    0, 
+    //by
+    0, 
+    //bz
+    0, 
+    //ex
+    1, 
+    //ey
+    1, 
+    //ez
+    1
+    );
+}
+
 if (Preview == "Intersect") 
 {
-  intersection(){
+  intersection()
+    {
     translate([w+ps, 0, ps]){
       rotate([90, 0, 180]){
         frontback();
