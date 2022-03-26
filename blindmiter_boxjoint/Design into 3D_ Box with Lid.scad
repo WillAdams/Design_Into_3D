@@ -576,6 +576,7 @@ module back2(tool, dpth) {
 
 if (Generate_3D_Preview == false) {
   if (Generate_DXF == true) {
+  projection () {
     union(){
       cutparts("square", 0, "Parts", -(0.9 * st));
       translate([0, (d + (ps + st * 3)), 0]){
@@ -588,7 +589,8 @@ if (Generate_3D_Preview == false) {
         }
       }
     }
-  } else {
+  }
+ } else {
     union(){
       translate([h, (h + ps), 0]){
         rotate([0, 0, 90]){
