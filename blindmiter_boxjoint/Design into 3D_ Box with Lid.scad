@@ -1,11 +1,12 @@
 //!OpenSCAD
 
 Height = 2.6;
-Width = 8;
-Depth = 5;
+Width = 7.75;
+Depth = 4.75;
 Stock_Thickness = 0.3287;
 Number_of_Divisions = 7;
-Lid_Type = "Sliding";// [Sliding, Hinged]
+Lid_Type = "Hinged";
+lid_alternative = len("Sawn") + len("Sliding");
 Lid_Location = 11;
 Part_Spacing = 0.375;
 V_endmill = 390;
@@ -13,12 +14,13 @@ V_radius = 0.0625;
 Square_endmill = 282;
 Square_radius = 0.0394;
 Units = 25.4; // [1:Metric, 25.4:Imperial]
-//3D Preview
 Generate_3D_Preview = true;
 Generate_DXF = false;
 Show_Text = true;
 Text_Size = 1;
 $fn=20;
+module empty () {};
+//tools_and_depths = ((len("any") + len("any")) + (len("square") + st / 2)) + (((len("square") + pd) + (len("vee") + 0)) + (len("square") + 0));
 h = Height * Units;
 w = Width * Units;
 d = Depth * Units;
@@ -30,250 +32,38 @@ pd = vr / tan((90 / 2));
 sr = Square_radius * Units;
 dboffset = sr - sin(45) * sr;
 pw = (h - st * 2) / (Number_of_Divisions * 2 + 1);
+// item = 0;
 
-module back2(tool, dpth) {
-  if (tool == "any" && dpth == "any") {
-    difference() {
-      makeboard(st, w, h, "B");
+module cutparts(tool, dpth, label, elevation) {
+  difference() {
+    stockoutline();
 
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "square" && dpth == st / 2) {
-    union(){
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "square" && dpth == pd) {
-    union(){
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "vee" && dpth == 0) {
-    union(){
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  }
-
-}
-
-module front(tool, dpth) {
-  if (tool == "any" && dpth == "any") {
-    difference() {
-      difference() {
-        makeboard(st, w, h, "F");
-
-        if (Lid_Type == "Sliding") {
-          union(){
-            translate([st, (h - st), (-(st / 2))]){
-              cube([(w - st * 2), st, (st * 2)], center=false);
-            }
-            translate([(st / 2), (h - st), (-(st / 2))]){
-              cube([(w - st), (st / 2), (st * 2)], center=false);
+    translate([st, st, elevation]){
+      sides(tool, dpth);
+      translate([(d + (ps + st)), 0, 0]){
+        front(tool, dpth);
+        translate([(w + (ps + st)), 0, 0]){
+          sides(tool, dpth);
+          translate([(d + (ps + st)), 0, 0]){
+            back2(tool, dpth);
+            translate([(w + (ps + st)), 0, 0]){
+              top2(tool, dpth);
+              translate([(w + (ps + st)), 0, 0]){
+                bottom(tool, dpth);
+              }
             }
           }
         }
-
-      }
-
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "square" && dpth == st / 2) {
-    union(){
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "square" && dpth == pd) {
-    union(){
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "vee" && dpth == 0) {
-    union(){
-      cutsquare(tool, dpth, w);
-      cutjoinery(tool, dpth, w, "positive");
-    }
-  } else if (tool == "outline") {
-    difference() {
-      makeboard(st, w, h, "F");
-
-      union(){
-        translate([st, (h - st), (-(st / 2))]){
-          cube([(w - st * 2), st, (st * 2)], center=false);
-        }
-        translate([(st / 2), (h - st), (-(st / 2))]){
-          cube([(w - st), (st / 2), (st * 2)], center=false);
-        }
       }
     }
-  }
-
-}
-
-module select_tool(tool_number) {
-  if (tool_number == 201) {
-    gcp_endmill_square(6.35, 19.05);
-  } else if (tool_number == 202) {
-    gcp_endmill_ball(6.35, 19.05);
-  } else if (tool_number == 102) {
-    gcp_endmill_square(3.175, 19.05);
-  } else if (tool_number == 101) {
-    gcp_endmill_ball(3.175, 19.05);
-  } else if (tool_number == 301) {
-    gcp_endmill_v(90, 12.7);
-  } else if (tool_number == 302) {
-    gcp_endmill_v(60, 12.7);
-  } else if (tool_number == 390) {
-    gcp_endmill_v(90, 3.175);
-  } else if (tool_number == 282) {
-    gcp_endmill_square(2, 6.604);
-  }
-
-}
-
-module gcp_endmill_v(es_v_angle, es_diameter) {
-  union(){
-    cylinder(r1=0, r2=(es_diameter / 2), h=((es_diameter / 2) / tan((es_v_angle / 2))), center=false);
-    translate([0, 0, ((es_diameter / 2) / tan((es_v_angle / 2)))]){
-      cylinder(r1=(es_diameter / 2), r2=(es_diameter / 2), h=(st * 2), center=false);
-    }
-  }
-}
-
-module pocket(bx, by, bz, ex, ey, ez, ULdogbones, URdogbones, LRdogbones, LLdogbones, tooldiameter) {
-  union(){
-    hull(){
-      translate([(bx + tooldiameter / 2), (by + tooldiameter / 2), bz]){
-        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-      }
-      translate([(bx + tooldiameter / 2), (ey - tooldiameter / 2), bz]){
-        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-      }
-      translate([(ex - tooldiameter / 2), (by + tooldiameter / 2), bz]){
-        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-      }
-      translate([(ex - tooldiameter / 2), (ey - tooldiameter / 2), bz]){
-        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-      }
-    }
-    union(){
-      if (URdogbones == true) {
-        translate([((ex - tooldiameter / 2) + dboffset), ((ey - tooldiameter / 2) + dboffset), bz]){
-          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-        }
-      }
-
-      if (LLdogbones == true) {
-        translate([((bx + tooldiameter / 2) - dboffset), ((by + tooldiameter / 2) - dboffset), bz]){
-          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-        }
-      }
-
-      if (ULdogbones == true) {
-        translate([((bx + tooldiameter / 2) - dboffset), ((ey - tooldiameter / 2) + dboffset), bz]){
-          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-        }
-      }
-
-      if (LRdogbones == true) {
-        translate([((ex - tooldiameter / 2) + dboffset), ((by + tooldiameter / 2) - dboffset), bz]){
-          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
-        }
-      }
-
-    }
-  }
-}
-
-module gcut(bx, by, bz, ex, ey, ez, tn) {
-  hull(){
-    translate([bx, by, bz]){
-      select_tool(tn);
-    }
-    translate([ex, ey, ez]){
-      select_tool(tn);
-    }
-  }
-}
-
-module gcp_endmill_square(es_diameter, es_flute_length) {
-  cylinder(r1=(es_diameter / 2), r2=(es_diameter / 2), h=es_flute_length, center=false);
-}
-
-module gcp_endmill_ball(es_diameter, es_flute_length) {
-  translate([0, 0, (es_diameter / 2)]){
-    union(){
-      sphere(r=(es_diameter / 2));
-      cylinder(r1=(es_diameter / 2), r2=(es_diameter / 2), h=es_flute_length, center=false);
-    }
-  }
-}
-
-module makeboard(ht, wd, dpth, name2) {
-  difference() {
-    cube([wd, dpth, ht], center=false);
-
-    CenteredText(name2, wd, dpth);
-  }
-}
-
-module CenteredText(Text2, x, y) {
-  if (Show_Text == true) {
-    translate([(x / 2), (y / 2), (-st)]){
+    translate([ts, (d - st), (-st)]){
       // size is multiplied by 0.75 because openScad font sizes are in points, not pixels
       linear_extrude( height=(st * 3), twist=0, center=false){
-        text(str(Text2), font = "Roboto", size = ts*0.75, halign="center", valign="center");
+        text(str(label), font = "Roboto",size = ts*0.75);
       }
 
     }
   }
-
-}
-
-module bottom() {
-  difference() {
-    makeboard(st, w - st, d - st, "B");
-
-    translate([(-(st / 2)), (-(st / 2)), (st / 2)]){
-      cube([w, st, st], center=false);
-      translate([0, (d - st), 0]){
-        cube([w, st, st], center=false);
-      }
-      cube([st, d, st], center=false);
-      translate([(w - st), 0, 0]){
-        cube([st, d, st], center=false);
-      }
-    }
-  }
-}
-
-module sides(tool, dpth) {
-  if (tool == "any" && dpth == "any") {
-    difference() {
-      makeboard(st, d, h, "Side");
-
-      cutsquare(tool, dpth, d);
-      cutjoinery(tool, dpth, d, "negative");
-    }
-  } else if (tool == "square" && dpth == st / 2) {
-    union(){
-      cutsquare(tool, dpth, d);
-      cutjoinery(tool, dpth, d, "negative");
-    }
-  } else if (tool == "square" && dpth == pd) {
-    union(){
-      cutsquare(tool, dpth, d);
-      cutjoinery(tool, dpth, d, "negative");
-    }
-  } else if (tool == "vee" && dpth == 0) {
-    union(){
-      cutsquare(tool, dpth, d);
-      cutjoinery(tool, dpth, d, "negative");
-    }
-  }
-
 }
 
 module cutjoinery(tool, dpth, jw, type) {
@@ -345,6 +135,98 @@ module cutjoinery(tool, dpth, jw, type) {
 
 }
 
+module gcp_endmill_v(es_v_angle, es_diameter) {
+  union(){
+    cylinder(r1=0, r2=(es_diameter / 2), h=((es_diameter / 2) / tan((es_v_angle / 2))), center=false);
+    translate([0, 0, ((es_diameter / 2) / tan((es_v_angle / 2)))]){
+      cylinder(r1=(es_diameter / 2), r2=(es_diameter / 2), h=(st * 2), center=false);
+    }
+  }
+}
+
+module select_tool(tool_number) {
+  if (tool_number == 201) {
+    gcp_endmill_square(6.35, 19.05);
+  } else if (tool_number == 202) {
+    gcp_endmill_ball(6.35, 19.05);
+  } else if (tool_number == 102) {
+    gcp_endmill_square(3.175, 19.05);
+  } else if (tool_number == 101) {
+    gcp_endmill_ball(3.175, 19.05);
+  } else if (tool_number == 301) {
+    gcp_endmill_v(90, 12.7);
+  } else if (tool_number == 302) {
+    gcp_endmill_v(60, 12.7);
+  } else if (tool_number == 390) {
+    gcp_endmill_v(90, 3.175);
+  } else if (tool_number == 282) {
+    gcp_endmill_square(2, 6.604);
+  }
+
+}
+
+module CenteredText(Text2, x, y) {
+  if (Show_Text == true) {
+    translate([(x / 2), (y / 2), (-st)]){
+      // size is multiplied by 0.75 because openScad font sizes are in points, not pixels
+      linear_extrude( height=(st * 3), twist=0, center=false){
+        text(str(Text2), font = "Roboto", size = ts*0.75, halign="center",valign="center");
+      }
+
+    }
+  }
+
+}
+
+module gcp_endmill_ball(es_diameter, es_flute_length) {
+  translate([0, 0, (es_diameter / 2)]){
+    union(){
+      sphere(r=(es_diameter / 2));
+      cylinder(r1=(es_diameter / 2), r2=(es_diameter / 2), h=es_flute_length, center=false);
+    }
+  }
+}
+
+module gcut(bx, by, bz, ex, ey, ez, tn) {
+  hull(){
+    translate([bx, by, bz]){
+      select_tool(tn);
+    }
+    translate([ex, ey, ez]){
+      select_tool(tn);
+    }
+  }
+}
+
+module sides(tool, dpth) {
+  if (tool == "any" && dpth == "any") {
+    difference() {
+      makeboard(st, d, h, "Side");
+
+      cutsquare(tool, dpth, d);
+      cutjoinery(tool, dpth, d, "negative");
+    }
+  } else if (tool == "square" && dpth == st / 2) {
+    union(){
+      cutsquare(tool, dpth, d);
+      cutjoinery(tool, dpth, d, "negative");
+    }
+  } else if (tool == "square" && dpth == pd) {
+    union(){
+      cutsquare(tool, dpth, d);
+      cutjoinery(tool, dpth, d, "negative");
+    }
+  } else if (tool == "vee" && dpth == 0) {
+    union(){
+      cutsquare(tool, dpth, d);
+      cutjoinery(tool, dpth, d, "negative");
+    }
+  } else if (tool == "square" && dpth == 0) {
+    makeboard(st, d, h, "Side");
+  }
+
+}
+
 module cutsquare(tool, dpth, jw) {
   if (tool == "any" && dpth == "any" || tool == "square" && dpth == st / 2) {
     union(){
@@ -354,7 +236,7 @@ module cutsquare(tool, dpth, jw) {
       translate([(-(st / 2)), (h - st), (st / 2)]){
         cube([(jw + st), (st / 2), st], center=false);
       }
-      if (Lid_Type == "Hinged") {
+      if (Lid_Type == "Sawn") {
         if (Generate_3D_Preview == true) {
           translate([(-(st / 2)), ((st - sr) + pw * Lid_Location), (-(st / 2))]){
             cube([(jw + st), (sr * 2), (st * 3)], center=false);
@@ -372,14 +254,223 @@ module cutsquare(tool, dpth, jw) {
 
 }
 
-module Top() {
-  if (Lid_Type == "Hinged") {
-    translate([0, (st / 2), 0]){
-      difference() {
-        makeboard(st, w - st, d - st, "T");
+module front(tool, dpth) {
+  if (tool == "any" && dpth == "any") {
+    difference() {
+      makeboard(st, w, h, "F");
 
-        translate([(-(st / 2)), (-(st / 2)), (st / 2)]){
-          cube([w, st, st], center=false);
+      if (Lid_Type == "Sliding") {
+        union(){
+          translate([st, (h - st), (-(st / 2))]){
+            cube([(w - st * 2), st, (st * 2)], center=false);
+          }
+          translate([(st / 2), (h - st), (-(st / 2))]){
+            cube([(w - st), (st / 2), (st * 2)], center=false);
+          }
+        }
+      }
+
+      if (Lid_Type == "Sliding" || Lid_Type == "Sawn") {
+        union(){
+          cutsquare(tool, dpth, w);
+          cutjoinery(tool, dpth, w, "positive");
+        }
+      }
+
+      if (Lid_Type == "Hinged") {
+        union(){
+          translate([st, (h - st), (-(st / 2))]){
+            pocket(0, 0, 0, w - st * 2, st * 2, 0, false, false, false, false, sr * 2);
+          }
+        }
+      }
+
+    }
+  } else if (tool == "square" && dpth == st / 2) {
+    union(){
+      difference() {
+        cutsquare(tool, dpth, w);
+
+        if (Lid_Type == "Hinged") {
+          translate([st, (h - st), (-(st / 2))]){
+            pocket(0, 0, 0, w - st * 2, st * 2, 0, false, false, false, false, sr * 2);
+          }
+        }
+
+      }
+      cutjoinery(tool, dpth, w, "positive");
+    }
+  } else if (tool == "square" && dpth == pd) {
+    union(){
+      if (Lid_Type != "Hinged") {
+        cutsquare(tool, dpth, w);
+      }
+
+      cutjoinery(tool, dpth, w, "positive");
+    }
+  } else if (tool == "vee" && dpth == 0) {
+    union(){
+      cutsquare(tool, dpth, w);
+      cutjoinery(tool, dpth, w, "positive");
+    }
+  } else if (tool == "outline") {
+    difference() {
+      makeboard(st, w, h, "F");
+
+      union(){
+        translate([st, (h - st), (-(st / 2))]){
+          cube([(w - st * 2), st, (st * 2)], center=false);
+        }
+        translate([(st / 2), (h - st), (-(st / 2))]){
+          cube([(w - st), (st / 2), (st * 2)], center=false);
+        }
+      }
+    }
+  } else if (tool == "square" && dpth == 0) {
+    difference() {
+      makeboard(st, w, h, "F");
+
+      if (Lid_Type == "Sliding") {
+        union(){
+          translate([st, (h - st), (-(st / 2))]){
+            cube([(w - st * 2), st, (st * 2)], center=false);
+          }
+          translate([(st / 2), (h - st), (-(st / 2))]){
+            cube([(w - st), (st / 2), (st * 2)], center=false);
+          }
+        }
+      }
+
+      if (Lid_Type == "Sliding" || Lid_Type == "Sawn") {
+        union(){
+          cutsquare(tool, dpth, w);
+        }
+      }
+
+      if (Lid_Type == "Hinged") {
+        union(){
+          translate([st, (h - st), (-(st / 2))]){
+            pocket(0, 0, 0, w - st * 2, st * 2, 0, false, false, false, false, sr * 2);
+          }
+        }
+      }
+
+    }
+  }
+
+}
+
+module stockoutline() {
+  translate([0, 0, (-(0.1 * st))]){
+    cube([((w * 4 + d * 2) + (ps + st) * 7), (d + st * 4), (0.1 * st)], center=false);
+  }
+}
+
+module makeboard(ht, wd, dpth, name2) {
+  difference() {
+    cube([wd, dpth, ht], center=false);
+
+    CenteredText(name2, wd, dpth);
+  }
+}
+
+module pocket(bx, by, bz, ex, ey, ez, ULdogbones, URdogbones, LRdogbones, LLdogbones, tooldiameter) {
+  union(){
+    hull(){
+      translate([(bx + tooldiameter / 2), (by + tooldiameter / 2), bz]){
+        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=(st * 2), center=false);
+      }
+      translate([(bx + tooldiameter / 2), (ey - tooldiameter / 2), bz]){
+        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=(st * 2), center=false);
+      }
+      translate([(ex - tooldiameter / 2), (by + tooldiameter / 2), bz]){
+        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=(st * 2), center=false);
+      }
+      translate([(ex - tooldiameter / 2), (ey - tooldiameter / 2), bz]){
+        cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=(st * 2), center=false);
+      }
+    }
+    union(){
+      if (URdogbones == true) {
+        translate([((ex - tooldiameter / 2) + dboffset), ((ey - tooldiameter / 2) + dboffset), bz]){
+          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
+        }
+      }
+
+      if (LLdogbones == true) {
+        translate([((bx + tooldiameter / 2) - dboffset), ((by + tooldiameter / 2) - dboffset), bz]){
+          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
+        }
+      }
+
+      if (ULdogbones == true) {
+        translate([((bx + tooldiameter / 2) - dboffset), ((ey - tooldiameter / 2) + dboffset), bz]){
+          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
+        }
+      }
+
+      if (LRdogbones == true) {
+        translate([((ex - tooldiameter / 2) + dboffset), ((by + tooldiameter / 2) - dboffset), bz]){
+          cylinder(r1=(tooldiameter / 2), r2=(tooldiameter / 2), h=st, center=false);
+        }
+      }
+
+    }
+  }
+}
+
+module gcp_endmill_square(es_diameter, es_flute_length) {
+  cylinder(r1=(es_diameter / 2), r2=(es_diameter / 2), h=es_flute_length, center=false);
+}
+
+module top2(tool, dpth) {
+  if (tool == "any" && dpth == "any") {
+    if (Lid_Type == "Sawn") {
+      translate([0, (st / 2), 0]){
+        difference() {
+          makeboard(st, w - st, d - st, "T");
+
+          translate([(-(st / 2)), (-(st / 2)), (st / 2)]){
+            cube([w, st, st], center=false);
+            translate([0, (d - st), 0]){
+              cube([w, st, st], center=false);
+            }
+            cube([st, d, st], center=false);
+            translate([(w - st), 0, 0]){
+              cube([st, d, st], center=false);
+            }
+          }
+        }
+      }
+    } else if (Lid_Type == "Hinged") {
+      translate([0, (st * 1), 0]){
+        union(){
+          difference() {
+            makeboard(st, w - st * 2, d, "T");
+
+            translate([(w / 2 - st), 0, (st * 0.75)]){
+              cylinder(r1=st, r2=(st * 1.5), h=(st * 0.5), center=false);
+            }
+            translate([(-(st * 1)), (d - st / 2), (st / 2)]){
+              cube([w, st, st], center=false);
+            }
+            union(){
+              gcut(0, 0, st - sr, 0, d, st - sr, V_endmill);
+              gcut(w - st * 2, 0, st - sr, w - st * 2, d, st - sr, V_endmill);
+            }
+          }
+          translate([0, (d - st / 2), (st / 2)]){
+            rotate([0, 90, 0]){
+              cylinder(r1=(st / 2), r2=(st / 2), h=(w - st * 2), center=false);
+            }
+          }
+        }
+      }
+    } else {
+      difference() {
+        makeboard(st, w - st, d - st / 2, "T");
+
+        translate([(-(st / 2)), 0, (st / 2)]){
           translate([0, (d - st), 0]){
             cube([w, st, st], center=false);
           }
@@ -388,13 +479,45 @@ module Top() {
             cube([st, d, st], center=false);
           }
         }
+        translate([(w / 2 - st * 0.25), (st * 2.5), (st * 0.75)]){
+          cylinder(r1=(st * 1), r2=(st * 1.5), h=(st * 0.5), center=false);
+        }
       }
     }
-  } else {
-    difference() {
-      makeboard(st, w - st, d - st / 2, "T");
 
-      translate([(-(st / 2)), 0, (st / 2)]){
+  } else if (tool == "square" && dpth == 0) {
+    translate([st, 0, 0]){
+      makeboard(st, w - st * 2, d, "T");
+    }
+  } else if (tool == "vee" && dpth == 0) {
+    if (Lid_Type == "Hinged") {
+      translate([(st * 1), 0, (-st)]){
+        union(){
+          gcut(0, 0, st - sr, 0, d, st - sr, V_endmill);
+          gcut(w - st * 2, 0, st - sr, w - st * 2, d, st - sr, V_endmill);
+        }
+      }
+    }
+
+  }
+
+}
+
+module bottom(tool, dpth) {
+  if (tool == "square" && dpth == 0) {
+    translate([(st / 2), (st / 2), 0]){
+      makeboard(st, w - st, d - st, "B");
+    }
+  } else if (tool == "square" && dpth == st / 2) {
+    translate([st, st, 0]){
+      makeboard(st, w - st * 2, d - st * 2, "B");
+    }
+  } else if (tool == "any" && dpth == "any") {
+    difference() {
+      makeboard(st, w - st, d - st, "B");
+
+      translate([(-(st / 2)), (-(st / 2)), (st / 2)]){
+        cube([w, st, st], center=false);
         translate([0, (d - st), 0]){
           cube([w, st, st], center=false);
         }
@@ -408,119 +531,62 @@ module Top() {
 
 }
 
+module back2(tool, dpth) {
+  difference() {
+    if (tool == "any" && dpth == "any") {
+      difference() {
+        makeboard(st, w, h, "Back");
+
+        cutsquare(tool, dpth, w);
+        cutjoinery(tool, dpth, w, "positive");
+      }
+    } else if (tool == "square" && dpth == st / 2) {
+      union(){
+        cutsquare(tool, dpth, w);
+        cutjoinery(tool, dpth, w, "positive");
+      }
+    } else if (tool == "square" && dpth == pd) {
+      union(){
+        cutsquare(tool, dpth, w);
+        cutjoinery(tool, dpth, w, "positive");
+      }
+    } else if (tool == "vee" && dpth == 0) {
+      union(){
+        cutsquare(tool, dpth, w);
+        cutjoinery(tool, dpth, w, "positive");
+      }
+    } else if (tool == "square" && dpth == 0) {
+      difference() {
+        makeboard(st, w, h, "Back");
+
+        cutsquare(tool, dpth, w);
+      }
+    }
+
+    if (Lid_Type == "Hinged") {
+      union(){
+        translate([st, (h - st), (-(st / 2))]){
+          pocket(0, 0, 0, w - st * 2, st * 2, 0, false, false, false, false, sr * 2);
+        }
+      }
+    }
+
+  }
+}
+
 if (Generate_3D_Preview == false) {
   if (Generate_DXF == true) {
     union(){
-      difference() {
-        cube([((w * 3 + d) + (ps + st) * 5), (d + st * 2), (0.1 * st)], center=false);
-
-        translate([st, st, (-(0.1 * st))]){
-          cube([d, h, st], center=false);
-          translate([(d + (ps + st)), 0, 0]){
-            cube([w, h, st], center=false);
-            translate([(w + (ps + st)), 0, 0]){
-              cube([w, d, st], center=false);
-              translate([(w + (ps + st)), 0, 0]){
-                cube([w, d, st], center=false);
-              }
-            }
-          }
-        }
-        translate([ts, (d - st), (-st)]){
-          // size is multiplied by 0.75 because openScad font sizes are in points, not pixels
-          linear_extrude( height=(st * 3), twist=0, center=false){
-            text("Parts", font = "Roboto", size = ts*0.75);
-          }
-
-        }
-      }
-      translate([0, (d + (ps + st)), 0]){
-        difference() {
-          cube([((w * 3 + d) + (ps + st) * 5), (d + st * 2), (0.1 * st)], center=false);
-
-          translate([st, st, (-(0.9 * st))]){
-            union(){
-              sides("square", st / 2);
-              translate([(d + (ps + st)), 0, 0]){
-                back2("square", st / 2);
-                translate([(w + (ps + st * 1.5)), (st / 2), (st * 0.25)]){
-                  bottom();
-                  translate([(w + (ps + st * 1.5)), (st / 2), 0]){
-                    Top();
-                  }
-                }
-              }
-            }
-          }
-          translate([ts, (d - st), (-st)]){
-            // size is multiplied by 0.75 because openScad font sizes are in points, not pixels
-            linear_extrude( height=(st * 3), twist=0, center=false){
-              text(str((st / 2)), font = "Roboto", size = ts*0.75);
-            }
-
+      cutparts("square", 0, "Parts", -(0.9 * st));
+      translate([0, (d + (ps + st * 3)), 0]){
+        cutparts("square", st / 2, st / 2, -(0.9 * st));
+        translate([0, (d + (ps + st * 3)), 0]){
+          cutparts("square", pd, pd, -(0.9 * st));
+          translate([0, (d + (ps + st * 3)), 0]){
+            cutparts("vee", 0, "vee", -(0.9 * st));
           }
         }
       }
-      translate([0, ((d + (ps + st)) * 2), 0]){
-        difference() {
-          cube([((w * 3 + d) + (ps + st) * 5), (d + st * 2), (0.1 * st)], center=false);
-
-          translate([st, st, (-(0.9 * st))]){
-            sides("square", pd);
-            translate([(d + (ps + st)), 0, 0]){
-              back2("square", pd);
-              translate([(w + (ps + st * 1.5)), (st / 2), (0.6 * st)]){
-                bottom();
-                translate([(w + (ps + st * 1.5)), (st / 2), 0]){
-                  Top();
-                }
-              }
-            }
-          }
-          translate([(st + ts), (d - st), (-st)]){
-            // size is multiplied by 0.75 because openScad font sizes are in points, not pixels
-            linear_extrude( height=(st * 3), twist=0, center=false){
-              text(str((st - pd)), font = "Roboto", size = ts*0.75);
-            }
-
-          }
-        }
-      }
-      translate([0, ((d + (ps + st)) * 3), 0]){
-        difference() {
-          cube([((w * 3 + d) + (ps + st) * 5), (d + st * 2), (0.1 * st)], center=false);
-
-          translate([st, st, (-st)]){
-            sides("vee", 0);
-            translate([(d + (ps + st)), 0, 0]){
-              back2("vee", 0);
-            }
-          }
-          translate([(st + ts), (d - st), (-st)]){
-            // size is multiplied by 0.75 because openScad font sizes are in points, not pixels
-            linear_extrude( height=(st * 3), twist=0, center=false){
-              text(str(st), font = "Roboto", size = ts*0.75);
-            }
-
-          }
-        }
-      }
-      if (Lid_Type == "Sliding") {
-        translate([0, ((d + (ps + st)) * 4), 0]){
-          difference() {
-            cube([((w * 3 + d) + (ps + st) * 5), (d + st * 2), (0.1 * st)], center=false);
-
-            translate([st, st, (-(st / 4))]){
-              translate([(d + (ps + st)), 0, 0]){
-                front("outline", pd);
-              }
-            }
-            translate([(st + ts), (d - st), (-st)]){
-            }
-          }
-        }
-      }
-
     }
   } else {
     union(){
@@ -535,18 +601,18 @@ if (Generate_3D_Preview == false) {
         }
       }
       translate([(h + ps), (h + ps), 0]){
-        bottom();
+        bottom("any", "any");
       }
       translate([(h + ps), ((h + ps) + (d + ps)), 0]){
         back2("any", "any");
+        translate([0, (h + ps), 0]){
+          top2("any", "any");
+        }
       }
       translate([((h + ps) + (w + ps)), ((d + h) + ps), 0]){
         rotate([0, 0, 270]){
           sides("any", "any");
         }
-      }
-      translate([(h + ps), ((h + ps) * 2 + (d + ps)), 0]){
-        Top();
       }
     }
   }
@@ -569,12 +635,21 @@ if (Generate_3D_Preview == false) {
     }
     translate([(ps + st / 2), (ps + st / 2), st]){
       mirror([0,0,1]){
-        bottom();
+        bottom("any", "any");
       }
     }
-    translate([(ps + st / 2), ps, ((h - st) + ps * 2)]){
-      Top();
+    if (Lid_Type == "Hinged") {
+      translate([(ps + st), (-st), (h + ps * 2)]){
+        mirror([0,0,1]){
+          top2("any", "any");
+        }
+      }
+    } else {
+      translate([(ps + st / 2), ps, ((h - st) + ps * 2)]){
+        top2("any", "any");
+      }
     }
+
     translate([(w + ps * 2), (d + ps), ps]){
       rotate([0, 90, 0]){
         rotate([0, 0, 90]){
