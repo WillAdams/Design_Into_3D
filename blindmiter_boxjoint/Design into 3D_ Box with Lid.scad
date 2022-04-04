@@ -1,8 +1,8 @@
 //!OpenSCAD
 
 Height = 2.6;
-Width = 8;
-Depth = 5;
+Width = 8.25;
+Depth = 5.25;
 Stock_Thickness = 0.3287;
 Number_of_Divisions = 7;
 Lid_Type = "Sliding"; // [Sawn:Sawn, Sliding:Sliding, Hinged:Hinged]
@@ -603,6 +603,7 @@ module top2(tool, dpth) {
 
 if (Generate_3D_Preview == false) {
   if (Generate_DXF == true) {
+  projection () {
     union(){
       cutparts("square", 0, "Parts", -(0.9 * st));
       translate([0, (d + (ps + st * 3)), 0]){
@@ -615,7 +616,8 @@ if (Generate_3D_Preview == false) {
         }
       }
     }
-  } else {
+  }
+ } else {
     union(){
       translate([h, (h + ps), 0]){
         rotate([0, 0, 90]){
