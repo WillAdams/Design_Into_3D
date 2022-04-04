@@ -556,9 +556,20 @@ module top2(tool, dpth) {
     }
 
   } else if (tool == "square" && dpth == 0) {
-    translate([st, 0, 0]){
-      makeboard(st, w - st * 2, d, "T");
+    if (Lid_Type == "Hinged") {
+      translate([st, 0, 0]){
+        makeboard(st, w - st * 2, d, "T");
+      }
+    } else if (Lid_Type == "Sliding") {
+      translate([(st / 2), 0, 0]){
+        makeboard(st, w - st, d - st / 2, "T");
+      }
+    } else if (Lid_Type == "Sawn") {
+      translate([(st / 2), (st / 2), 0]){
+        makeboard(st, w - st, d - st, "T");
+      }
     }
+
   } else if (tool == "vee" && dpth == 0) {
     if (Lid_Type == "Hinged") {
       translate([(st * 1), 0, (-(st / 2))]){
@@ -576,7 +587,9 @@ module top2(tool, dpth) {
           makeboard(st * 2, w - st * 2, d, "T");
         }
       } else if (Lid_Type == "Sawn") {
-
+        translate([st, st, 0]){
+          makeboard(st * 2, w - st * 2, d - st * 2, "T");
+        }
       } else if (Lid_Type == "Sliding") {
         translate([st, 0, 0]){
           makeboard(st * 2, w - st * 2, d - st, "T");
@@ -591,9 +604,7 @@ module top2(tool, dpth) {
       } else if (Lid_Type == "Sawn") {
 
       } else if (Lid_Type == "Sliding") {
-        translate([(st / 2), 0, 0]){
-          makeboard(st * 2, w - st, d - st / 2, "T");
-        }
+
       }
 
     }
@@ -603,14 +614,14 @@ module top2(tool, dpth) {
 
 if (Generate_3D_Preview == false) {
   if (Generate_DXF == true) {
-  projection () {
+  projection (){
     union(){
       cutparts("square", 0, "Parts", -(0.9 * st));
-      translate([0, (d + (ps + st * 3)), 0]){
+      translate([0, (d + (ps + st) * 3), 0]){
         cutparts("square", st / 2, st / 2, -(0.9 * st));
-        translate([0, (d + (ps + st * 3)), 0]){
+        translate([0, (d + (ps + st) * 3), 0]){
           cutparts("square", pd, pd, -(0.9 * st));
-          translate([0, (d + (ps + st * 3)), 0]){
+          translate([0, (d + (ps + st) * 3), 0]){
             cutparts("vee", 0, "vee", -(0.9 * st));
           }
         }
