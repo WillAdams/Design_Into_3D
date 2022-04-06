@@ -1,11 +1,11 @@
 //!OpenSCAD
 
-Height = 2.6;
-Width = 8.25;
-Depth = 5.25;
+Height = 1.7;
+Width = 8;
+Depth = 4;
 Stock_Thickness = 0.3287;
-Number_of_Divisions = 7;
-Lid_Type = "Sliding"; // [Sawn:Sawn, Sliding:Sliding, Hinged:Hinged]
+Number_of_Divisions = 3;
+Lid_Type = "Hinged"; // [Sawn:Sawn, Sliding:Sliding, Hinged:Hinged]
 Lid_Location = 11;
 Part_Spacing = 0.375;
 V_endmill = 390;
@@ -13,7 +13,7 @@ V_radius = 0.0625;
 Square_endmill = 282;
 Square_radius = 0.0394;
 Units = 25.4; // [1:Metric, 25.4:Imperial]
-Generate_3D_Preview = false;
+Generate_3D_Preview = true;
 Generate_DXF = true;
 Show_Text = true;
 Text_Size = 1;
@@ -232,9 +232,18 @@ module cutsquare(tool, dpth, jw) {
       translate([(-(st / 2)), (st / 2), (st / 2)]){
         cube([(jw + st), (st / 2), st], center=false);
       }
-      translate([(-(st / 2)), (h - st), (st / 2)]){
-        cube([(jw + st), (st / 2), st], center=false);
+      if (Lid_Type == "Sawn") {
+        translate([(-(st / 2)), (h - st), (st / 2)]){
+          cube([(jw + st), (st / 2), st], center=false);
+        }
+      } else if (Lid_Type == "Sliding") {
+        translate([(-(st / 2)), (h - st), (st / 2)]){
+          cube([(jw + st), (st / 2), st], center=false);
+        }
+      } else {
+
       }
+
       if (Lid_Type == "Sawn") {
         if (Generate_3D_Preview == true) {
           translate([(-(st / 2)), ((st - sr) + pw * Lid_Location), (-(st / 2))]){
@@ -614,7 +623,7 @@ module top2(tool, dpth) {
 
 if (Generate_3D_Preview == false) {
   if (Generate_DXF == true) {
-  projection (){
+  projection () {
     union(){
       cutparts("square", 0, "Parts", -(0.9 * st));
       translate([0, (d + (ps + st) * 3), 0]){
