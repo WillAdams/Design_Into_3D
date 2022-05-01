@@ -1,8 +1,8 @@
 //!OpenSCAD
 
-Height = 1.7;
-Width = 8;
-Depth = 4;
+Height = 1.75;
+Width = 8.125;
+Depth = 4.0625;
 Stock_Thickness = 0.3287;
 Number_of_Divisions = 3;
 Lid_Type = "Hinged"; // [Sawn:Sawn, Sliding:Sliding, Hinged:Hinged]
