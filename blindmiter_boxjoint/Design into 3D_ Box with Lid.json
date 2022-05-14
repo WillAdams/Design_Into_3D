@@ -1,29 +1,25 @@
 {
-    "fileFormatVersion": "1",
     "parameterSets": {
-        "New set 1": "",
-        "New set 2": "",
-        "New set 3": "",
-        "New set 4": "",
-        "New set 5": {
-            "$fn": "20",
-            "Depth": "5.25",
-            "Generate_3D_Preview": "false",
+        "Pencil Case": {
+            "$fn": "40",
+            "Depth": "70",
+            "Generate_3D_Preview": "true",
             "Generate_DXF": "true",
-            "Height": "2.6000000000000001",
-            "Lid_Location": "11",
+            "Height": "42",
+            "Lid_Location": "2",
             "Lid_Type": "Hinged",
-            "Number_of_Divisions": "7",
-            "Part_Spacing": "0.375",
+            "Number_of_Divisions": "3",
+            "Part_Spacing": "3",
             "Show_Text": "true",
             "Square_endmill": "282",
-            "Square_radius": "0.039399999999999998",
-            "Stock_Thickness": "0.32869999999999999",
-            "Text_Size": "1",
-            "Units": "25.399999999999999",
+            "Square_radius": "1",
+            "Stock_Thickness": "8",
+            "Text_Size": "12",
+            "Units": "1",
             "V_endmill": "390",
-            "V_radius": "0.0625",
-            "Width": "8.25"
+            "V_radius": "1.5875",
+            "Width": "204"
         }
-    }
+    },
+    "fileFormatVersion": "1"
 }
