@@ -1,12 +1,12 @@
 //!OpenSCAD
 
-Height = 1.75;
+Height = 1.7;
 Width = 8.125;
 Depth = 4.0625;
 Stock_Thickness = 0.3287;
 Number_of_Divisions = 3;
 Lid_Type = "Hinged"; // [Sawn:Sawn, Sliding:Sliding, Hinged:Hinged]
-Lid_Location = 11;
+Lid_Location = 2;
 Part_Spacing = 0.375;
 V_endmill = 390;
 V_radius = 0.0625;
@@ -19,7 +19,6 @@ Show_Text = true;
 Text_Size = 1;
 $fn=20;
 module empty () {};
-//tools_and_depths = ((len("any") + len("any")) + (len("square") + st / 2)) + (((len("square") + pd) + (len("vee") + 0)) + (len("square") + 0));
 h = Height * Units;
 w = Width * Units;
 d = Depth * Units;
@@ -31,7 +30,8 @@ pd = vr / tan((90 / 2));
 sr = Square_radius * Units;
 dboffset = sr - sin(45) * sr;
 pw = (h - st * 2) / (Number_of_Divisions * 2 + 1);
-//item = 0;
+
+//tools_and_depths are ((len("any") + len("any")) + (len("square") + st / 2)) + (((len("square") + pd) + (len("vee") + 0)) + (len("square") + 0));
 
 module cutparts(tool, dpth, label, elevation) {
   difference() {
@@ -232,16 +232,12 @@ module cutsquare(tool, dpth, jw) {
       translate([(-(st / 2)), (st / 2), (st / 2)]){
         cube([(jw + st), (st / 2), st], center=false);
       }
-      if (Lid_Type == "Sawn") {
-        translate([(-(st / 2)), (h - st), (st / 2)]){
-          cube([(jw + st), (st / 2), st], center=false);
-        }
-      } else if (Lid_Type == "Sliding") {
-        translate([(-(st / 2)), (h - st), (st / 2)]){
-          cube([(jw + st), (st / 2), st], center=false);
-        }
-      } else {
+      if (Lid_Type == "Hinged") {
 
+      } else {
+        translate([(-(st / 2)), (h - st), (st / 2)]){
+          cube([(jw + st), (st / 2), st], center=false);
+        }
       }
 
       if (Lid_Type == "Sawn") {
@@ -264,36 +260,33 @@ module cutsquare(tool, dpth, jw) {
 
 module front(tool, dpth) {
   if (tool == "any" && dpth == "any") {
-    difference() {
-      makeboard(st, w, h, "F");
+    if (Lid_Type == "Hinged") {
+      frontback(tool, dpth, "F");
+    } else {
+      difference() {
+        makeboard(st, w, h, "F");
 
-      if (Lid_Type == "Sliding") {
-        union(){
-          translate([st, (h - st), (-(st / 2))]){
-            cube([(w - st * 2), st, (st * 2)], center=false);
-          }
-          translate([(st / 2), (h - st), (-(st / 2))]){
-            cube([(w - st), (st / 2), (st * 2)], center=false);
-          }
-        }
-      }
-
-      if (Lid_Type == "Sliding" || Lid_Type == "Sawn") {
-        union(){
-          cutsquare(tool, dpth, w);
-          cutjoinery(tool, dpth, w, "positive");
-        }
-      }
-
-      if (Lid_Type == "Hinged") {
-        union(){
-          translate([st, (h - st), (-(st / 2))]){
-            pocket(0, 0, 0, w - st * 2, st * 2, 0, false, false, false, false, sr * 2);
+        if (Lid_Type == "Sliding") {
+          union(){
+            translate([st, (h - st), (-(st / 2))]){
+              cube([(w - st * 2), st, (st * 2)], center=false);
+            }
+            translate([(st / 2), (h - st), (-(st / 2))]){
+              cube([(w - st), (st / 2), (st * 2)], center=false);
+            }
           }
         }
-      }
 
+        if (Lid_Type == "Sliding" || Lid_Type == "Sawn") {
+          union(){
+            cutsquare(tool, dpth, w);
+            cutjoinery(tool, dpth, w, "positive");
+          }
+        }
+
+      }
     }
+
   } else if (tool == "square" && dpth == st / 2) {
     union(){
       difference() {
@@ -459,11 +452,11 @@ module bottom(tool, dpth) {
 
 }
 
-module back2(tool, dpth) {
+module frontback(tool, dpth, fb) {
   difference() {
     if (tool == "any" && dpth == "any") {
       difference() {
-        makeboard(st, w, h, "Back");
+        makeboard(st, w, h, fb);
 
         cutsquare(tool, dpth, w);
         cutjoinery(tool, dpth, w, "positive");
@@ -621,9 +614,13 @@ module top2(tool, dpth) {
 
 }
 
+module back2(tool, dpth) {
+  frontback(tool, dpth, "Back");
+}
+
 if (Generate_3D_Preview == false) {
   if (Generate_DXF == true) {
-  projection () {
+      projection() {
     union(){
       cutparts("square", 0, "Parts", -(0.9 * st));
       translate([0, (d + (ps + st) * 3), 0]){
@@ -637,7 +634,7 @@ if (Generate_3D_Preview == false) {
       }
     }
   }
- } else {
+} else {
     union(){
       translate([h, (h + ps), 0]){
         rotate([0, 0, 90]){
