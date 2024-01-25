@@ -115,6 +115,7 @@ module pocketrect(px, py, pbottom, endmillshape, pdiameter, plength, pwidth, pde
 }
 
 module box() {
+if (Generate_DXF_or_STL == 2) {
   difference() {
     union(){
       if (Boxshape == 0) {
@@ -141,6 +142,35 @@ module box() {
     }
 
   }
+}
+if (Generate_DXF_or_STL == 1) {
+  difference() {
+    union(){
+      if (Boxshape == 0) {
+        pocketrect(0, 0, 0, 1, Thickness, Length, Width, Height - halfthickness);
+      } else {
+        cube([Width, Length, (Height - halfthickness)], center=false);
+      }
+}
+      pocketrect(Thickness / 2 + halfclearance, Thickness / 2 + halfclearance, halfthickness, 1, halfthickness, (Length - Thickness) - halfclearance * 2, (Width - Thickness) - halfclearance * 2, Height - halfthickness);
+    }
+
+    for (i = [0 : abs(1) : dividers_widthwise]) {
+      for (j = [0 : abs(1) : dividers_lengthwise]) {
+        if (largecompartment == 1 && (i % 2 == 1 && j == 0)) {
+          pocketrect((Thickness + pcwidth * i) + dividers_thickness * (i + 0), (Thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, intlength, pcwidth, Height);
+        } else if (largecompartment == 2 && (j % 2 == 0 && i == 0)) {
+          pocketrect((Thickness + pcwidth * i) + dividers_thickness * (i + 0), (Thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, pclength, intwidth, Height);
+        } else {
+          pocketrect((Thickness + pcwidth * i) + dividers_thickness * (i + 0), (Thickness + pclength * j) + dividers_thickness * (j + 0), radius, endmillshape, diameter, pclength, pcwidth, Height);
+        }
+
+      }
+
+    }
+
+  
+}
 }
 
 halfthickness = Thickness / 2;
