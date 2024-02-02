@@ -132,6 +132,7 @@ if (Generate_DXF_or_STL == "STL") {
   }
 
 } else {
+  projection()
   union(){
     translate([(-(rwidthhalf * 1.1)), 0, 0]){
       union(){
