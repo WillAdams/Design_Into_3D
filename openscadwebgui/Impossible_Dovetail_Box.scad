@@ -72,8 +72,8 @@ module maketop() {
 module cuttopdovetails() {
   union(){
     hull(){
-      cutdovetails(-(rwidthquarter - sd * 4), -(rwidthquarter * 1.875), ht * Box_Proportion, -(rwidthquarter - sd * 4), rwidthquarter * 1.875, ht * Box_Proportion);
-      cutdovetails(rwidthquarter - sd * 4, -(rwidthquarter * 1.875), ht * Box_Proportion, rwidthquarter - sd * 4, rwidthquarter * 1.875, ht * Box_Proportion);
+      cutdovetails(-(rwidthquarter - sd * 2), -(rwidthquarter * 1.875), ht * Box_Proportion, -(rwidthquarter - sd * 2), rwidthquarter * 1.875, ht * Box_Proportion);
+      cutdovetails(rwidthquarter - sd * 2, -(rwidthquarter * 1.875), ht * Box_Proportion, rwidthquarter - sd * 2, rwidthquarter * 1.875, ht * Box_Proportion);
     }
     hull(){
       cutdovetails(-(rwidthquarter + sd * 4), -rwidthquarter, ht * Box_Proportion, -(rwidthquarter + sd * 4), rwidthquarter, ht * Box_Proportion);
